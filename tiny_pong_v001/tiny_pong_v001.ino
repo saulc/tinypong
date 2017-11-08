@@ -4,6 +4,18 @@
 
 SSD1306_Mini oled;
 
+int buzz = 1;
+
+void startBuzz(){
+  for(int x = 0; x<255; x+=50){
+      analogWrite(buzz, x);
+      delay(200+x);
+      analogWrite(buzz, 0);
+      delay(100);
+  }
+     
+}
+
 void heartBeat(){
 
     digitalWrite(4, HIGH);   // set the LED on  
@@ -54,7 +66,26 @@ static unsigned char p2 = RowCount/2;
 
 
 
-// this is the room shape
+// this is the room shape //32 x 16
+const static uint8_t tinypong[] PROGMEM ={
+1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1,
+0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0,
+0,1,1,1,1,1,1,0 , 0,1,1,1,1,1,1,0 , 1,1,0,0,0,0,1,0 , 1,1,0,0,0,0,1,1,
+0,0,0,1,1,0,0,0 , 0,0,0,1,1,0,0,0 , 1,1,1,0,0,0,1,0 , 1,1,0,0,0,0,1,1,
+0,0,0,1,1,0,0,0 , 0,0,0,1,1,0,0,0 , 1,0,1,1,0,0,1,0 , 1,1,0,0,0,0,1,1,
+0,0,0,1,1,0,0,0 , 0,0,0,1,1,0,0,0 , 1,0,0,1,1,0,1,0 , 1,1,1,1,1,1,1,1,
+0,0,0,1,1,0,0,0 , 0,0,0,1,1,0,0,0 , 1,0,0,0,1,1,1,0 , 0,0,0,1,1,0,0,0,
+0,0,0,1,1,0,0,0 , 0,1,1,1,1,1,1,0 , 1,0,0,0,0,1,1,0 , 0,0,0,1,1,0,0,0,
+0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0,
+1,1,1,1,1,1,1,0 , 1,1,1,1,1,1,1,0 , 1,1,0,0,0,0,1,0 , 1,1,1,1,1,1,1,1,
+1,1,0,0,0,0,1,0 , 1,1,0,0,0,0,1,0 , 1,1,1,0,0,0,1,0 , 1,1,0,0,0,0,1,1,
+1,1,0,0,0,0,1,0 , 1,1,0,0,0,0,1,0 , 1,0,1,1,0,0,1,0 , 1,1,0,0,0,0,0,0,
+1,1,1,1,1,1,1,0 , 1,1,0,0,0,0,1,0 , 1,0,0,1,1,0,1,0 , 1,1,0,0,1,1,1,1,
+1,1,0,0,0,0,0,0 , 1,1,0,0,0,0,1,0 , 1,0,0,0,1,1,1,0 , 1,1,0,0,0,0,1,1,
+1,1,0,0,0,0,0,0 , 1,1,1,1,1,1,1,0 , 1,0,0,0,0,1,1,0 , 1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1,
+};
+
 const static uint8_t room[] PROGMEM ={
 1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1,
 0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0,
@@ -73,7 +104,6 @@ const static uint8_t room[] PROGMEM ={
 0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0,
 1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1,
 };
-
 
 //const static uint8_t room[] PROGMEM ={
 //1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1 , 1,1,1,1,1,1,1,1,
@@ -137,7 +167,93 @@ unsigned char hitRoom( unsigned char row, unsigned char col ){
  
   return data;
 }
+
+
+
+unsigned char getSplash( unsigned char row, unsigned char col  ){
+
+  unsigned char data= pgm_read_byte( &(tinypong[row*ColCount + col]) );
   
+  return data;
+}
+
+void splash(){
+
+  oled.startScreen();
+
+  uint8_t upperRow;
+  uint8_t lowerRow;
+
+  uint8_t data[4];
+  
+
+        
+          // send a bunch of data in one xmission
+     
+//            upperRow= getRoom(r, c);
+//            lowerRow= getRoom(r+1, c);
+//     
+
+            //data= 0x0;
+            
+      for (char r=0;r<RowCount; r=r+2 ){
+      for (char c=0;c<ColCount; c++){
+            upperRow= getSplash(r, c);
+            lowerRow= getSplash(r+1, c);
+
+               data[0]= 0x0;
+               data[1]= 0x0;
+               data[2]= 0x0;
+               data[3]= 0x0;
+                if (upperRow){
+               data[0]|= wall[upperRow][0] << 0;
+               data[1]|= wall[upperRow][1] << 0;
+               data[2]|= wall[upperRow][2] << 0;
+               data[3]|= wall[upperRow][3] << 0;
+            }
+            
+            if (lowerRow){
+               data[0]|= wall[lowerRow][0] << 4;
+               data[1]|= wall[lowerRow][1] << 4;
+               data[2]|= wall[lowerRow][2] << 4;
+               data[3]|= wall[lowerRow][3] << 4;
+            }
+            
+          Wire.beginTransmission(SlaveAddress);
+          Wire.send(GOFi2cOLED_Data_Mode);            // data mode
+
+
+            Wire.send( data[0] );
+            Wire.send( data[1] );
+            Wire.send( data[2] );
+            Wire.send( data[3] );
+          Wire.endTransmission();
+      }
+      }
+             
+//            
+//            // room
+//            if (upperRow){
+//               data[0]|= wall[upperRow][0] << 0;
+//               data[1]|= wall[upperRow][1] << 0;
+//               data[2]|= wall[upperRow][2] << 0;
+//               data[3]|= wall[upperRow][3] << 0;
+//            }
+//            
+//            if (lowerRow){
+//               data[0]|= wall[lowerRow][0] << 4;
+//               data[1]|= wall[lowerRow][1] << 4;
+//               data[2]|= wall[lowerRow][2] << 4;
+//               data[3]|= wall[lowerRow][3] << 4;
+//            }
+       
+        
+    
+  
+}
+
+
+
 void displayRoom(){
 
   oled.startScreen();
@@ -259,8 +375,8 @@ void snake(){
 }
 
 void readInput(){
-  int a1 = analogRead(3);
-  int a2 = analogRead(2);
+  int a1 = analogRead(2);
+  int a2 = analogRead(3);
 
    a1 = map(a1, 0, 1023, 1, RowCount-1);
    a2 = map(a2, 0, 1023, 1, RowCount-1);
@@ -338,6 +454,9 @@ void setup()
 
     oled.init(0x3d);
     oled.clear();
+    splash();
+ // displayRoom();
+    startBuzz();
     
 //    for (int k=0;k<100;k++){
 //    for (int i=0;i<1000;i++){
